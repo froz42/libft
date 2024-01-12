@@ -3,8 +3,10 @@ CC := cc
 CFLAGS := -Wall -Wextra -Werror
 LIBFTDIR := libft
 LIBFT := $(LIBFTDIR)/libft.a
+LIBFT_DEBUG := $(LIBFTDIR)/libftdebug.a
 LIBFTINC := $(LIBFTDIR)/includes
-LIBS := -L $(LIBFTDIR) -lft
+LIBS :=
+FORMAT_COMMAND := clang-format -i -style=file
 
 ifneq ($(filter debug redebug,$(MAKECMDGOALS)),)
 	CFLAGS += -g
@@ -35,18 +37,23 @@ NAME_DEBUG := $(NAME)_debug
 
 all: $(NAME)
 
+debug: $(NAME_DEBUG)
+
 $(LIBFT):
 	$(MAKE) -C $(LIBFTDIR)
 
+$(LIBFT_DEBUG):
+	$(MAKE) -C $(LIBFTDIR) debug
+
 $(NAME): $(LIBFT) $(OBJS_RELEASE) $(OBJS_MAIN_RELEASE)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS_RELEASE) $(OBJS_MAIN_RELEASE) $(LIBS)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJS_RELEASE) $(OBJS_MAIN_RELEASE) $(LIBS) -L $(LIBFTDIR) -lft
 
-$(NAME_DEBUG): $(LIBFT) $(OBJS_DEBUG) $(OBJS_MAIN_DEBUG)
-	$(CC) $(CFLAGS) -o $(NAME_DEBUG) $(OBJS_DEBUG) $(OBJS_MAIN_DEBUG) $(LIBS)
+$(NAME_DEBUG): $(LIBFT_DEBUG) $(OBJS_DEBUG) $(OBJS_MAIN_DEBUG)
+	$(CC) $(CFLAGS) -o $(NAME_DEBUG) $(OBJS_DEBUG) $(OBJS_MAIN_DEBUG) $(LIBS) -L $(LIBFTDIR) -lftdebug
 
-debug: $(NAME_DEBUG)
 
 unit: $(LIBFT) $(OBJS_DEBUG)
+	make -C libft unit
 	libft/scripts/car.sh $(OBJS_DEBUG)
 
 -include $(DEPS_RELEASE)
@@ -70,5 +77,8 @@ fclean: clean
 re: fclean all
 
 redebug: fclean debug
+
+format:
+	find . -regex '.*\.\(c\|h\)' -exec $(FORMAT_COMMAND) {} \;
 
 .PHONY: all clean fclean re debug redebug

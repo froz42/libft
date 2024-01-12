@@ -35,3 +35,5 @@ echo -e "${GREEN}Generating github pipeline...${NC}"
 mkdir -p .github/workflows
 
 sed "s/{{name}}/$PROJECT_NAME/g" libft/scripts/templates/test.yml.template > .github/workflows/test.yml
+
+cp libft/scripts/templates/.clang-format.template .clang-format
